@@ -1,0 +1,23 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %level [%thread] %logger{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="io.netty" level="warn"/>
+    <logger name="org.jboss" level="info"/>
+    <logger name="org.infinispan" level="info"/>
+    <logger name="org.jgroups" level="info"/>
+    <logger name="io.vertx.mqtt" level="warn"/>
+    <logger name="io.vertx.test" level="info"/>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="io.vertx.mqtt.impl.MqttClientImpl" level="debug"/>
+
+
+</configuration>

@@ -5,14 +5,18 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.mqtt.MqttServer;
 import io.vertx.mqtt.MqttTopicSubscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServerMqttVerticle extends AbstractVerticle {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerMqttVerticle.class);
+
     @Override
-    public void start() throws Exception {
+    public void start() {
 
         MqttServer mqttServer = MqttServer.create(vertx);
 
@@ -20,17 +24,17 @@ public class ServerMqttVerticle extends AbstractVerticle {
                 .endpointHandler(endpoint -> {
 
                     // shows main connect info
-                    System.out.println("MQTT client [" + endpoint.clientIdentifier() + "] request to connect, clean session = " + endpoint.isCleanSession());
+                    LOGGER.info("MQTT client [" + endpoint.clientIdentifier() + "] request to connect, clean session = " + endpoint.isCleanSession());
 
                     if (endpoint.auth() != null) {
-                        System.out.println("[username = " + endpoint.auth().getUsername() + ", password = " + endpoint.auth().getPassword() + "]");
+                        LOGGER.info("[username = " + endpoint.auth().getUsername() + ", password = " + endpoint.auth().getPassword() + "]");
                     }
                     if (endpoint.will() != null) {
-                        System.out.println("[will flag = " + endpoint.will().isWillFlag() + " topic = " + endpoint.will().getWillTopic() + " msg = " + endpoint.will().getWillMessage() +
+                        LOGGER.info("[will flag = " + endpoint.will().isWillFlag() + " topic = " + endpoint.will().getWillTopic() + " msg = " + endpoint.will().getWillMessage() +
                                 " QoS = " + endpoint.will().getWillQos() + " isRetain = " + endpoint.will().isWillRetain() + "]");
                     }
 
-                    System.out.println("[keep alive timeout = " + endpoint.keepAliveTimeSeconds() + "]");
+                    LOGGER.info("[keep alive timeout = " + endpoint.keepAliveTimeSeconds() + "]");
 
                     // accept connection from the remote client
                     endpoint.accept(false);
@@ -40,7 +44,7 @@ public class ServerMqttVerticle extends AbstractVerticle {
 
                         List<MqttQoS> grantedQosLevels = new ArrayList<>();
                         for (MqttTopicSubscription s : subscribe.topicSubscriptions()) {
-                            System.out.println("Subscription for " + s.topicName() + " with QoS " + s.qualityOfService());
+                            LOGGER.info("Subscription for " + s.topicName() + " with QoS " + s.qualityOfService());
                             grantedQosLevels.add(s.qualityOfService());
                         }
                         // ack the subscriptions request
@@ -56,7 +60,7 @@ public class ServerMqttVerticle extends AbstractVerticle {
                         // specifing handlers for handling QoS 1 and 2
                         endpoint.publishAcknowledgeHandler(messageId -> {
 
-                            System.out.println("Received ack for message = " + messageId);
+                            LOGGER.info("Received ack for message = " + messageId);
 
                         }).publishReceivedHandler(messageId -> {
 
@@ -64,7 +68,7 @@ public class ServerMqttVerticle extends AbstractVerticle {
 
                         }).publishCompletionHandler(messageId -> {
 
-                            System.out.println("Received ack for message = " + messageId);
+                            LOGGER.info("Received ack for message = " + messageId);
                         });
                     });
 
@@ -72,7 +76,7 @@ public class ServerMqttVerticle extends AbstractVerticle {
                     endpoint.unsubscribeHandler(unsubscribe -> {
 
                         for (String t : unsubscribe.topics()) {
-                            System.out.println("Unsubscription for " + t);
+                            LOGGER.info("Unsubscription for " + t);
                         }
                         // ack the subscriptions request
                         endpoint.unsubscribeAcknowledge(unsubscribe.messageId());
@@ -81,25 +85,25 @@ public class ServerMqttVerticle extends AbstractVerticle {
                     // handling ping from client
                     endpoint.pingHandler(v -> {
 
-                        System.out.println("Ping received from client");
+                        LOGGER.info("Ping received from client");
                     });
 
                     // handling disconnect message
                     endpoint.disconnectHandler(v -> {
 
-                        System.out.println("Received disconnect from client");
+                        LOGGER.info("Received disconnect from client");
                     });
 
                     // handling closing connection
                     endpoint.closeHandler(v -> {
 
-                        System.out.println("Connection closed");
+                        LOGGER.info("Connection closed");
                     });
 
                     // handling incoming published messages
                     endpoint.publishHandler(message -> {
 
-                        System.out.println("Just received message on [" + message.topicName() + "] payload [" + message.payload() + "] with QoS [" + message.qosLevel() + "]");
+                        LOGGER.info("Just received message on [" + message.topicName() + "] payload [" + message.payload() + "] with QoS [" + message.qosLevel() + "]");
 
                         if (message.qosLevel() == MqttQoS.AT_LEAST_ONCE) {
                             endpoint.publishAcknowledge(message.messageId());
@@ -114,9 +118,9 @@ public class ServerMqttVerticle extends AbstractVerticle {
                 .listen(1883, "0.0.0.0", ar -> {
 
                     if (ar.succeeded()) {
-                        System.out.println("MQTT server is listening on port " + mqttServer.actualPort());
+                        LOGGER.info("MQTT server is listening on port " + mqttServer.actualPort());
                     } else {
-                        System.err.println("Error on starting the server" + ar.cause().getMessage());
+                        LOGGER.error("Error on starting the server" + ar.cause().getMessage());
                     }
                 });
     }
