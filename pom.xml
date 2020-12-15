@@ -16,7 +16,8 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <vertx.version>4.0.0.CR2</vertx.version>
+    <vertx.version>4.0.0</vertx.version>
+    <logback-classic.version>1.2.3</logback-classic.version>
   </properties>
 
   <dependencyManagement>
@@ -41,6 +42,11 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-mqtt</artifactId>
       <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback-classic.version}</version>
     </dependency>
   </dependencies>
 
